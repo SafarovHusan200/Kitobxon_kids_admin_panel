@@ -129,3 +129,6 @@ export const getReferralGrowth = async (period: "daily" | "monthly") => {
 export const getAllRegistration = async () => {
   return fetchAPI<any>(`/users/all-registration`);
 };
+export const getSearchUsers = async (q: string) => {
+  return fetchAPI<any>(`/users/search?q=${encodeURIComponent(q)}`);
+};

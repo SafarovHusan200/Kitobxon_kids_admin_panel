@@ -1,18 +1,33 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface RegionDistributionChartProps {
   data: Array<{
-    region: string
-    count: number
-  }>
+    region: string;
+    count: number;
+  }>;
 }
 
-export function RegionDistributionChart({ data }: RegionDistributionChartProps) {
+export function RegionDistributionChart({
+  data,
+}: RegionDistributionChartProps) {
   // Sort by count descending and take top 10
-  const sortedData = [...data].sort((a, b) => b.count - a.count).slice(0, 10)
+  const sortedData = [...data].sort((a, b) => b.count - a.count);
 
   return (
     <Card>
@@ -23,7 +38,11 @@ export function RegionDistributionChart({ data }: RegionDistributionChartProps) 
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={sortedData} layout="vertical">
-            <XAxis type="number" className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))" }} />
+            <XAxis
+              type="number"
+              className="text-xs"
+              tick={{ fill: "hsl(var(--muted-foreground))" }}
+            />
             <YAxis
               type="category"
               dataKey="region"
@@ -43,5 +62,5 @@ export function RegionDistributionChart({ data }: RegionDistributionChartProps) 
         </ResponsiveContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

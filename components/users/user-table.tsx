@@ -89,7 +89,7 @@ export function UserTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {users?.map((user) => (
               <TableRow
                 key={user.userId}
                 className="cursor-pointer hover:bg-accent/50"

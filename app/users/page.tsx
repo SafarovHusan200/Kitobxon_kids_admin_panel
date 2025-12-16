@@ -8,7 +8,12 @@ import { Header } from "@/components/header";
 import { UserTable } from "@/components/users/user-table";
 import { UserFilters } from "@/components/users/user-filters";
 import { UserDrawer } from "@/components/users/user-drawer";
-import { getUsers, getFilterOptions, getAllRegistration } from "@/lib/api";
+import {
+  getUsers,
+  getFilterOptions,
+  getAllRegistration,
+  getSearchUsers,
+} from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
 import { exportUsersExcel } from "@/utils/exportUsersExcel";
@@ -62,29 +67,20 @@ export default function UsersPage() {
 
   // Fetch users
   useEffect(() => {
+    if (!isAuthenticated || debouncedSearch) return;
+
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const params: any = {
+
+        const response = await getUsers({
           page,
           limit: pageSize,
-        };
-
-        if (debouncedSearch) params.search = debouncedSearch;
-        if (selectedRegions.length > 0)
-          params.region = selectedRegions.join(",");
-        if (selectedAgeGroups.length > 0)
-          params.ageGroup = selectedAgeGroups.join(",");
-        if (registrationStatus !== "all")
-          params.registered = registrationStatus === "registered";
-
-        const response = await getUsers(params);
-        console.log("[v0] Users data loaded:", response);
+        });
 
         setUsers(response.users);
         setTotal(response.total);
       } catch (error) {
-        console.error("[v0] Error fetching users:", error);
         toast({
           title: "Error",
           description: "Failed to load users",
@@ -95,19 +91,34 @@ export default function UsersPage() {
       }
     };
 
-    if (isAuthenticated) {
-      fetchUsers();
-    }
-  }, [
-    isAuthenticated,
-    page,
-    pageSize,
-    debouncedSearch,
-    selectedRegions,
-    selectedAgeGroups,
-    registrationStatus,
-    toast,
-  ]);
+    fetchUsers();
+  }, [page, pageSize, debouncedSearch, isAuthenticated, toast]);
+
+  // Search users
+  useEffect(() => {
+    if (!isAuthenticated || !debouncedSearch) return;
+
+    const searchUsers = async () => {
+      try {
+        setLoading(true);
+
+        const response = await getSearchUsers(debouncedSearch);
+
+        setUsers(response);
+        setTotal(response?.length);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load users",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    searchUsers();
+  }, [debouncedSearch, isAuthenticated, toast]);
 
   const handleReset = () => {
     setSearch("");
