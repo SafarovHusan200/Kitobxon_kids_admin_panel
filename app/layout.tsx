@@ -12,19 +12,11 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Kitobxon Admin Dashboard",
   description: "User management system for Kitobxon Kids",
-  generator: "v0.app",
+  generator: "husandev.uz",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
+        url: "/logo.jpg",
         type: "image/svg+xml",
       },
     ],
