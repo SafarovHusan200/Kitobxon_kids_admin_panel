@@ -1,121 +1,137 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
-import { Sidebar } from "@/components/sidebar"
-import { Header } from "@/components/header"
-import { UserTable } from "@/components/users/user-table"
-import { UserFilters } from "@/components/users/user-filters"
-import { UserDrawer } from "@/components/users/user-drawer"
-import { getUsers, getFilterOptions } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
-import { useDebounce } from "@/hooks/use-debounce"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { Sidebar } from "@/components/sidebar";
+import { Header } from "@/components/header";
+import { UserTable } from "@/components/users/user-table";
+import { UserFilters } from "@/components/users/user-filters";
+import { UserDrawer } from "@/components/users/user-drawer";
+import { getUsers, getFilterOptions, getAllRegistration } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/use-debounce";
+import { exportUsersExcel } from "@/utils/exportUsersExcel";
 
 export default function UsersPage() {
-  const { isAuthenticated, loading: authLoading } = useAuth()
-  const router = useRouter()
-  const { toast } = useToast()
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const [loading, setLoading] = useState(true)
-  const [users, setUsers] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
-  const [search, setSearch] = useState("")
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([])
-  const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([])
-  const [registrationStatus, setRegistrationStatus] = useState("all")
+  const [search, setSearch] = useState("");
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
+  const [registrationStatus, setRegistrationStatus] = useState("all");
 
-  const [regions, setRegions] = useState<string[]>([])
-  const [ageGroups, setAgeGroups] = useState<string[]>([])
+  const [regions, setRegions] = useState<string[]>([]);
+  const [ageGroups, setAgeGroups] = useState<string[]>([]);
 
-  const [selectedUser, setSelectedUser] = useState<any>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const debouncedSearch = useDebounce(search, 300)
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push("/login")
+      router.push("/login");
     }
-  }, [isAuthenticated, authLoading, router])
+  }, [isAuthenticated, authLoading, router]);
 
   // Fetch filter options
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const options = await getFilterOptions()
-        setRegions(options.regions)
-        setAgeGroups(options.ageGroups)
+        const options = await getFilterOptions();
+        setRegions(options.regions);
+        setAgeGroups(options.ageGroups);
       } catch (error) {
-        console.error("[v0] Error fetching filter options:", error)
+        console.error("[v0] Error fetching filter options:", error);
       }
-    }
+    };
 
     if (isAuthenticated) {
-      fetchOptions()
+      fetchOptions();
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
 
   // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const params: any = {
           page,
           limit: pageSize,
-        }
+        };
 
-        if (debouncedSearch) params.search = debouncedSearch
-        if (selectedRegions.length > 0) params.region = selectedRegions.join(",")
-        if (selectedAgeGroups.length > 0) params.ageGroup = selectedAgeGroups.join(",")
-        if (registrationStatus !== "all") params.registered = registrationStatus === "registered"
+        if (debouncedSearch) params.search = debouncedSearch;
+        if (selectedRegions.length > 0)
+          params.region = selectedRegions.join(",");
+        if (selectedAgeGroups.length > 0)
+          params.ageGroup = selectedAgeGroups.join(",");
+        if (registrationStatus !== "all")
+          params.registered = registrationStatus === "registered";
 
-        const response = await getUsers(params)
-        console.log("[v0] Users data loaded:", response)
+        const response = await getUsers(params);
+        console.log("[v0] Users data loaded:", response);
 
-        setUsers(response.users)
-        setTotal(response.total)
+        setUsers(response.users);
+        setTotal(response.total);
       } catch (error) {
-        console.error("[v0] Error fetching users:", error)
+        console.error("[v0] Error fetching users:", error);
         toast({
           title: "Error",
           description: "Failed to load users",
           variant: "destructive",
-        })
+        });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
     if (isAuthenticated) {
-      fetchUsers()
+      fetchUsers();
     }
-  }, [isAuthenticated, page, pageSize, debouncedSearch, selectedRegions, selectedAgeGroups, registrationStatus, toast])
+  }, [
+    isAuthenticated,
+    page,
+    pageSize,
+    debouncedSearch,
+    selectedRegions,
+    selectedAgeGroups,
+    registrationStatus,
+    toast,
+  ]);
 
   const handleReset = () => {
-    setSearch("")
-    setSelectedRegions([])
-    setSelectedAgeGroups([])
-    setRegistrationStatus("all")
-    setPage(1)
-  }
+    setSearch("");
+    setSelectedRegions([]);
+    setSelectedAgeGroups([]);
+    setRegistrationStatus("all");
+    setPage(1);
+  };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     toast({
       title: "Export Started",
       description: "Your CSV file is being prepared",
-    })
-    // Implement CSV export logic here
-  }
+    });
+
+    const usersData = await getAllRegistration();
+    console.log(usersData);
+    exportUsersExcel(usersData);
+  };
 
   const handleViewUser = (user: any) => {
-    setSelectedUser(user)
-    setIsDrawerOpen(true)
-  }
+    setSelectedUser(user);
+    setIsDrawerOpen(true);
+  };
 
   if (authLoading || !isAuthenticated) {
     return (
@@ -125,7 +141,7 @@ export default function UsersPage() {
           <p className="mt-4 text-muted-foreground">Loading...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -163,8 +179,8 @@ export default function UsersPage() {
               pageSize={pageSize}
               onPageChange={setPage}
               onPageSizeChange={(size) => {
-                setPageSize(size)
-                setPage(1)
+                setPageSize(size);
+                setPage(1);
               }}
               onViewUser={handleViewUser}
             />
@@ -172,7 +188,11 @@ export default function UsersPage() {
         </main>
       </div>
 
-      <UserDrawer user={selectedUser} isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+      <UserDrawer
+        user={selectedUser}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </div>
-  )
+  );
 }

@@ -125,3 +125,7 @@ export const getTopReferrers = async (limit = 10) => {
 export const getReferralGrowth = async (period: "daily" | "monthly") => {
   return fetchAPI<any>(`/users/referrals/growth?period=${period}`);
 };
+
+export const getAllRegistration = async () => {
+  return fetchAPI<any>(`/users/all-registration`);
+};
